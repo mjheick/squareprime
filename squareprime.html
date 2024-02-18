@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Square Prime</title>
+	<script>
+let starting = 0;
+let maxSquareCount = 1000;
+// This finds all numbers that have multiple factors, preferrably more than 2
+function makeSquareCount()
+{
+	let squareFactors = [];
+	let factorCount = 0;
+	for (let x = 2; x < maxSquareCount; x++)
+	{
+		factorCount = 0;
+		for (let y = 2; y < (x/2); y++)
+		{
+			if ((x % y) == 0)
+			{
+				factorCount++;
+			}
+		}
+		if (factorCount > 2)
+		{
+			squareFactors.push(x);
+		}
+	}
+	// clear UI 
+	let sc = document.getElementById('select-square-count');
+	for (let i = (sc.options.length - 1); i >= 0; i--)
+	{
+		sc.remove(i);
+	}
+	for (let i = 0; i < (squareFactors.length - 1); i++)
+	{
+		let o = document.createElement("option");
+		o.text = squareFactors[i];
+		o.value = squareFactors[i];
+		sc.add(o);
+	}
+	makeGridDimensions();
+}
+function makeGridDimensions()
+{
+	let gridDimensions = [];
+	let squareCount = document.getElementById('select-square-count').options[document.getElementById('select-square-count').selectedIndex].value;
+	// calculate grid dimensions based on squareCount
+	for (let x = 2; x <= squareCount; x++)
+	{
+		if ((squareCount % x) == 0)
+		{
+			gridDimensions.push(x + "x" + (squareCount / x));
+		}
+	}
+	// clear UI
+	let gd = document.getElementById('select-grid-dimensions');
+	for (let i = (gd.options.length - 1); i >= 0; i--)
+	{
+		gd.remove(i);
+	}
+	// Add the dimensions to the dropdown
+	for (let i = 0; i < (gridDimensions.length - 1); i++)
+	{
+		let o = document.createElement("option");
+		o.text = gridDimensions[i];
+		o.value = gridDimensions[i];
+		gd.add(o);
+	}
+	makePrimeGrid();
+}
+function makePrimeGrid()
+{
+	let startNumber = document.getElementById('starting').value;
+	let squareCount = document.getElementById('select-square-count').options[document.getElementById('select-square-count').selectedIndex].value;
+	let gridDimensions = document.getElementById('select-grid-dimensions').options[document.getElementById('select-grid-dimensions').selectedIndex].value;
+	let grids = gridDimensions.split('x');
+	let gridx = grids[0];
+	let gridy = grids[1];
+	let primeHTML = "";
+	let isPrime = true;
+
+	// clear
+	let field = document.getElementById('prime-grid');
+	field.innerHTML = "";
+	for (let y = 0; y < gridy; y++)
+	{
+		for (let x = 0; x < gridx; x++)
+		{
+			primeHTML = "";
+			isPrime = true;
+			for (let p = 2; p <= (startNumber / 2); p++)
+			{
+				if ((startNumber % p) == 0)
+				{
+					isPrime = false;
+				}
+			}
+			if (isPrime)
+			{
+				primeHTML = "<div class=\"field prime\" title=\"" + startNumber + "\">x</div>";
+			}
+			else
+			{
+				primeHTML = "<div class=\"field composite\" title=\"" + startNumber + "\">x</div>";
+			}
+			field.innerHTML = field.innerHTML + primeHTML;
+			startNumber++;
+		}
+		// carriage return
+		primeHTML = "<div style=\"clear:both;\"></div>";
+		field.innerHTML = field.innerHTML + primeHTML;
+	}
+}
+function checkStartingNumber()
+{
+	let start = document.getElementById('starting');
+	let sv = parseInt(start.value);
+	if (!isFinite(sv))
+	{
+		start.value = 1;
+	}
+	if (sv < 1)
+	{
+		start.value = 1;
+	}
+	makePrimeGrid();
+}
+function goPrevious()
+{
+	let start = document.getElementById('starting');
+	let squareCount = parseInt(document.getElementById('select-square-count').options[document.getElementById('select-square-count').selectedIndex].value);
+	let next = parseInt(start.value) - squareCount;
+	if (next < 1)
+	{
+		next = 1;
+	}
+	start.value = next;
+	makePrimeGrid();
+}
+function goNext()
+{
+	let start = document.getElementById('starting');
+	let squareCount = parseInt(document.getElementById('select-square-count').options[document.getElementById('select-square-count').selectedIndex].value);
+	let next = parseInt(start.value) + squareCount;
+	start.value = next;
+	makePrimeGrid();
+}
+	</script>
+	<style>
+div.field {
+	text-align: center;
+	float: left;
+	height: 32px;
+	width: 32px;
+}
+div.prime {
+	background-color: rgb(0, 255, 0);
+}
+div.composite {
+	background-color: rgb(255, 0, 0);
+}
+	</style>
+</head>
+<body>
+	<div>
+		<div class="square-count">Square Count: <select id="select-square-count"></select></div>
+		<div class="grid-dimensions">Grid Dimensions: <select id="select-grid-dimensions"></select></div>
+		<div class="navigation"><button id="button-previous">Previous</button> #: <input type="text" id="starting" value="0" /> <button id="button-next">Next</button></div>
+		<div id="prime-grid"></div>
+	</div>
+</body>
+<script>
+// set events
+document.getElementById('select-square-count').addEventListener("change", makeGridDimensions);
+document.getElementById('select-grid-dimensions').addEventListener("change", makePrimeGrid);
+document.getElementById('starting').addEventListener("blur", checkStartingNumber);
+document.getElementById('button-previous').addEventListener("click", goPrevious);
+document.getElementById('button-next').addEventListener("click", goNext);
+// kick things off
+makeSquareCount();
+</script>
+</html>
